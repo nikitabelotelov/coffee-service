@@ -52,7 +52,7 @@ function instantiateNewVersion() {
   saveVersion(version);
   git.clone(repoUrl, getRepoDirectory()).then(() => {
     try {
-      exec('npm install').on('exit', function (code, _) {
+      exec('npm install', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
         const program = getServerProgram();
         console.log('Trying to fork ' + program);
         options.cwd = getRepoDirectory();
