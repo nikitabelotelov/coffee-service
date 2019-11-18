@@ -42,11 +42,8 @@ function getServerProgram(): string {
 const git = simplegit();
 
 const parameters: Array<string> = [];
-// const options: ForkOptions = {
-//   stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-// };
 
-const options: ForkOptions = {
+let options: ForkOptions = {
   stdio: [0, 1, 2, 'ipc']
 };
 
@@ -58,6 +55,7 @@ function instantiateNewVersion() {
       exec('npm install').on('exit', function (code, _) {
         const program = getServerProgram();
         console.log('Trying to fork ' + program);
+        options.cwd = getRepoDirectory();
         const child = fork(program, parameters, options);
         child.on('message', message => {
           if (message === "update") {
