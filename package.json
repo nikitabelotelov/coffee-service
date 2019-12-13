@@ -16,7 +16,7 @@
     "cross-fetch": "^3.0.2",
     "express": "^4.16.4",
     "path": "^0.12.7",
-    "npm": "^6.13.1",
+    "npm": "^6.13.4",
     "simple-git": "^1.126.0"
   },
   "devDependencies": {
