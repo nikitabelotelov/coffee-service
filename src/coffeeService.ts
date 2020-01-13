@@ -47,22 +47,26 @@ let options: ForkOptions = {
   stdio: [0, 1, 2, 'ipc']
 };
 
+function startServer() {
+  const program = getServerProgram();
+  console.log('Trying to fork ' + program);
+  options.cwd = getRepoDirectory();
+  const child = fork(program, parameters, options);
+  child.on('message', message => {
+    if (message === "update") {
+      child.kill();
+      instantiateNewVersion();
+    }
+  });
+}
+
 function instantiateNewVersion() {
   version++;
   saveVersion(version);
   git.clone(repoUrl, getRepoDirectory()).then(() => {
     try {
       exec('npm link express && npm link ws && npm link raspi-serial', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
-        const program = getServerProgram();
-        console.log('Trying to fork ' + program);
-        options.cwd = getRepoDirectory();
-        const child = fork(program, parameters, options);
-        child.on('message', message => {
-          if (message === "update") {
-            child.kill();
-            instantiateNewVersion();
-          }
-        });
+        startServer();
       });
     } catch (e) {
       console.error('Error while running program!');
@@ -71,4 +75,8 @@ function instantiateNewVersion() {
   }, (err) => console.error(err));
 }
 
-instantiateNewVersion();
+if (version === 0) {
+  instantiateNewVersion();
+} else {
+  startServer();
+}
