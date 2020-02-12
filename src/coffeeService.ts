@@ -65,7 +65,7 @@ function instantiateNewVersion() {
   saveVersion(version);
   git.clone(repoUrl, getRepoDirectory()).then(() => {
     try {
-      exec('npm link express && npm link ws && npm link raspi-serial', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
+      exec('npm link express && npm link ws && npm link raspi-serial && npm link redux', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
         startServer();
       });
     } catch (e) {
