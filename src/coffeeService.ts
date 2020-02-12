@@ -77,9 +77,9 @@ function instantiateNewVersion() {
   git.clone(repoUrl, getRepoDirectory(version)).then(() => {
     console.log("New version downloaded: " + version);
     try {
-      exec('npm link express && npm link ws && npm link raspi-serial', { cwd: getRepoDirectory(version) }).on('exit', function (code, _) {
-        copyProfilesConfig();
+      exec('npm link express && npm link ws && npm link raspi-serial && npm link redux', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
         startServer();
+        copyProfilesConfig();
       });
     } catch (e) {
       console.error('Error while running program!');
