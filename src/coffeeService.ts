@@ -25,8 +25,8 @@ function getVersion(): number {
   }
 }
 
-function getRepoDirectory(): string {
-  return "../" + repoName + version;
+function getRepoDirectory(repoVersion:number): string {
+  return "../" + repoName + repoVersion;
 }
 
 function saveVersion(version: number) {
@@ -50,22 +50,35 @@ let options: ForkOptions = {
 function startServer() {
   const program = getServerProgram();
   console.log('Trying to fork ' + program);
-  options.cwd = getRepoDirectory();
+  options.cwd = getRepoDirectory(version);
   const child = fork(program, parameters, options);
   child.on('message', message => {
     if (message === "update") {
+      console.log("Trying to download updates");
       child.kill();
       instantiateNewVersion();
     }
   });
 }
 
+function copyProfilesConfig() {
+  if(version > 1) {
+    let prevProfilesPath = getRepoDirectory(version - 1) + '/settingsProfiles.json'
+    let newProfilesPath = getRepoDirectory(version) + '/settingsProfiles.json'
+    if(fs.existsSync(prevProfilesPath)) {
+      fs.copyFileSync(prevProfilesPath, newProfilesPath)
+    }
+  }
+}
+
 function instantiateNewVersion() {
   version++;
   saveVersion(version);
-  git.clone(repoUrl, getRepoDirectory()).then(() => {
+  git.clone(repoUrl, getRepoDirectory(version)).then(() => {
+    console.log("New version downloaded: " + version);
     try {
-      exec('npm link express && npm link ws && npm link raspi-serial', { cwd: getRepoDirectory() }).on('exit', function (code, _) {
+      exec('npm link express && npm link ws && npm link raspi-serial', { cwd: getRepoDirectory(version) }).on('exit', function (code, _) {
+        copyProfilesConfig();
         startServer();
       });
     } catch (e) {
